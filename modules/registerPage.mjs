@@ -1,4 +1,4 @@
-export default class registerPage {
+export default class RegisterPage {
   constructor(databaseManager) {
     this.db = databaseManager;
     this.registerForm = document.getElementById("register-form");
@@ -18,8 +18,9 @@ export default class registerPage {
       console.error("Invalid registration data");
       return;
     }
+
     try {
-      if (await db.registerUser(formData)) {
+      if (await this.db.registerUser(data)) {
         console.log("User registered successfully");
       } else {
         console.error("Error registering user");
@@ -29,11 +30,16 @@ export default class registerPage {
     }
   }
 
-  validateRegistrationData(data) {
+  async validateRegistrationData(data) {
     const username = data.get("username");
     const email = data.get("email");
     const password = data.get("password");
     const confirmPassword = data.get("confirm-password");
+    const validChars = /^[a-zA-Z0-9]+$/;
+
+    const checkUsernameAvailability = await this.db.checkUsernameAvailability(
+      username
+    );
 
     if (!username || !email || !password) {
       return false;
@@ -45,32 +51,12 @@ export default class registerPage {
       return;
     } else if (password !== confirmPassword) {
       return false;
+    } else if (!validChars.test(username)) {
+      return false;
+    } else if (!checkUsernameAvailability) {
+      return false;
     }
 
     return true;
-  }
-
-  async checkUsernameAvailability(username) {
-    const db = await this.db.dbPromise;
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(["users"], "readonly");
-      const store = transaction.objectStore("users");
-      const request = store.get(username);
-
-      request.onsuccess = () => {
-        if (request.result) {
-          resolve(false);
-        } else {
-          resolve(true);
-        }
-      };
-
-      request.onerror = (event) => {
-        console.error(
-          "Error checking username availability: " + event.target.errorCode
-        );
-        reject(false);
-      };
-    });
   }
 }

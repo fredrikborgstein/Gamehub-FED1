@@ -52,5 +52,38 @@ export default class databaseManager {
     });
   }
 
-  async checkUsernameAvailability(username) {}
+  async checkUsernameAvailability(username) {
+    try {
+      const db = await this.dbPromise; // Access the dbPromise correctly
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction("users", "readonly");
+        const store = transaction.objectStore("users");
+        const request = store.get(username);
+
+        request.onsuccess = () => {
+          // If a result exists, username is not available
+          resolve(!request.result);
+        };
+
+        request.onerror = (event) => {
+          console.error(
+            "Error checking username availability: " + event.target.errorCode
+          );
+          reject(new Error("Database error occurred while checking username."));
+        };
+
+        transaction.oncomplete = () => {
+          console.log("Transaction completed for username check.");
+        };
+
+        transaction.onabort = () => {
+          console.warn("Transaction aborted for username check.");
+          reject(new Error("Transaction aborted during username check."));
+        };
+      });
+    } catch (error) {
+      console.error("Unexpected error in checkUsernameAvailability:", error);
+      throw new Error("Unexpected error occurred while checking username.");
+    }
+  }
 }
