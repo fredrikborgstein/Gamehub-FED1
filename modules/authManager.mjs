@@ -7,7 +7,7 @@ export default class AuthManager {
     const encoder = new TextEncoder();
     const data = encoder.encode(password);
     const hash = await crypto.subtle.digest("SHA-256", data);
-    convertedHash = this.arrayBufferToBase64(hash);
+    const convertedHash = this.arrayBufferToBase64(hash);
     return convertedHash;
   }
 

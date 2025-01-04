@@ -5,6 +5,9 @@ import header from "./modules/header.mjs";
 import footer from "./modules/footer.mjs";
 import LoginPage from "./modules/loginPage.mjs";
 import AuthManager from "./modules/authManager.mjs";
+import Toaster from "./modules/toast.mjs";
+import Modal from "./modules/modal.mjs";
+import CustomerManager from "./modules/customerManager.mjs";
 
 const authManager = new AuthManager();
 const db = new databaseManager(authManager);
@@ -26,5 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const registerPage = new RegisterPage(db);
   } else if (route === "/login.html") {
     const loginPage = new LoginPage(db, authManager);
+  } else if (route === "/profile.html") {
+    const customerManager = new CustomerManager(db);
   }
 });
