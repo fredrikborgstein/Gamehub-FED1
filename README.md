@@ -8,6 +8,8 @@
 
 ---
 
+https://github.com/fredrikborgstein/Gamehub-FED1/tree/b73e41f08c1baf641e0de0b194401c9bc7a03d89
+
 ## Assignment Overview
 
 This project is part of the **Front-End Development** curriculum at Noroff University College, and is the course assignment for **Fredrik Borgstein**. The assignment focuses on applying the core principles of **HTML** and **CSS** to build a responsive and accessible web page.
