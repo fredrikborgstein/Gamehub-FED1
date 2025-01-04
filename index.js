@@ -4,11 +4,15 @@ import RegisterPage from "./modules/registerPage.mjs";
 import header from "./modules/header.mjs";
 import footer from "./modules/footer.mjs";
 import LoginPage from "./modules/loginPage.mjs";
+import AuthManager from "./modules/authManager.mjs";
 
-const db = new databaseManager();
+const authManager = new AuthManager();
+const db = new databaseManager(authManager);
 const route = window.location.pathname;
 const pathDepth = window.location.pathname.split("/").length - 2;
 const pathPrefix = "../".repeat(pathDepth);
+const sessionId = authManager.generateSessionId();
+sessionStorage.setItem("sessionId", sessionId);
 
 document.addEventListener("DOMContentLoaded", () => {
   const headerElement = header(pathDepth, pathPrefix);
@@ -21,6 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
   } else if (route === "/register.html") {
     const registerPage = new RegisterPage(db);
   } else if (route === "/login.html") {
-    const loginPage = new LoginPage(db);
+    const loginPage = new LoginPage(db, authManager);
   }
 });

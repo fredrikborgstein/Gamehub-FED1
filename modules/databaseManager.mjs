@@ -1,6 +1,7 @@
 export default class databaseManager {
-  constructor() {
+  constructor(authManager) {
     this.dbPromise = this.initDb();
+    this.authManager = authManager;
   }
 
   initDb() {
@@ -8,12 +9,10 @@ export default class databaseManager {
       const request = indexedDB.open("gamehub", 2);
 
       request.onerror = (event) => {
-        console.error("Database error: " + event.target.errorCode);
         reject(event.target.errorCode);
       };
 
       request.onsuccess = (event) => {
-        console.log("Database opened successfully");
         resolve(event.target.result);
       };
 
@@ -30,26 +29,31 @@ export default class databaseManager {
   }
 
   async registerUser(data) {
-    const db = await this.dbPromise;
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(["users"], "readwrite");
-      const store = transaction.objectStore("users");
+    try {
+      const db = await this.dbPromise;
       const username = data.get("username");
       const email = data.get("email");
-      const password = data.get("password");
+      const clearTextPassword = data.get("password");
+      const hashedPassword = await this.authManager.generatePasswordHash(
+        clearTextPassword
+      );
 
-      const request = store.add({ username, email, password });
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(["users"], "readwrite");
+        const store = transaction.objectStore("users");
+        const request = store.add({ username, email, hashedPassword });
 
-      request.onsuccess = () => {
-        console.log("User registered successfully");
-        resolve(true);
-      };
+        request.onsuccess = () => {
+          resolve(true);
+        };
 
-      request.onerror = (event) => {
-        console.error("Error registering user: " + event.target.errorCode);
-        reject(false);
-      };
-    });
+        request.onerror = (event) => {
+          reject(false);
+        };
+      });
+    } catch (error) {
+      throw error;
+    }
   }
 
   async checkUsernameAvailability(username) {
@@ -65,23 +69,18 @@ export default class databaseManager {
         };
 
         request.onerror = (event) => {
-          console.error(
-            "Error checking username availability: " + event.target.errorCode
-          );
           reject(new Error("Database error occurred while checking username."));
         };
 
         transaction.oncomplete = () => {
-          console.log("Transaction completed for username check.");
+          resolve(true);
         };
 
         transaction.onabort = () => {
-          console.warn("Transaction aborted for username check.");
           reject(new Error("Transaction aborted during username check."));
         };
       });
     } catch (error) {
-      console.error("Unexpected error in checkUsernameAvailability:", error);
       throw new Error("Unexpected error occurred while checking username.");
     }
   }
@@ -98,22 +97,21 @@ export default class databaseManager {
       request.onsuccess = () => {
         const user = request.result;
 
-        if (user && user.password === password) {
-          const userSession = JSON.stringify({
+        if (user && this.authManager.checkPassword(password, user.password)) {
+          const userSession = {
             user: username,
             email: user.email,
-          });
-          console.log("User logged in successfully");
-          sessionStorage.setItem("user", userSession);
+            sessionId: sessionStorage.getItem("sessionId"),
+            expiresAt: Date.now() + 3600 * 1000,
+          };
+          sessionStorage.setItem("user", JSON.stringify(userSession));
           resolve(true);
         } else {
-          console.error("Incorrect password");
           resolve(false);
         }
       };
 
       request.onerror = (event) => {
-        console.error("Error logging in user: " + event.target.errorCode);
         reject(false);
       };
     });

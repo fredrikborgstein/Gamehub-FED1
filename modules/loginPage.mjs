@@ -1,6 +1,7 @@
 export default class LoginPage {
-  constructor(databaseManager) {
+  constructor(databaseManager, authManager) {
     this.db = databaseManager;
+    this.authManager = authManager;
     this.registerForm = document.getElementById("login-form");
     this.registerBtn = document.getElementById("login-btn");
     this.registerEvents();
@@ -18,7 +19,13 @@ export default class LoginPage {
     try {
       if (await this.db.loginUser(data)) {
         console.log("User logged in successfully");
-        sessionStorage.setItem("auth", true);
+        const auth = {
+          isAuth: true,
+          username: data.get("username"),
+          sessionId: sessionStorage.getItem("sessionId"),
+          expiresAt: Date.now() + 3600 * 1000,
+        };
+        sessionStorage.setItem("auth", JSON.stringify(auth));
         window.location.href = "./profile.html";
       } else {
         console.error("Error logging in user");
