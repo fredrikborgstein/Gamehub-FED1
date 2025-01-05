@@ -11,3 +11,4 @@ export { default as ProductPage } from "./productPage.mjs";
 export { default as CustomerManager } from "./customerManager.mjs";
 export { default as ProductManager } from "./productManager.mjs";
 export { default as CartManager } from "./cartManager.mjs";
+export { default as SessionManager } from "./sessionManager.mjs";

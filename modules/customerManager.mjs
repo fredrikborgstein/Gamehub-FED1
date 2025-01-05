@@ -3,18 +3,27 @@ import user from "./utils.mjs";
 export default class CustomerManager {
   constructor(databaseManager) {
     this.db = databaseManager;
-    const { username, email, avatar } = user();
-
-    this.username = username;
-    this.email = email;
-    this.avatar = avatar;
     this.profileTitle = document.getElementById("profile-title");
     this.profileCard = document.getElementById("profile-card");
     this.orderHistorySection = document.getElementById("profile-orders");
-    this.populatePofilePage();
+
+    this.init();
   }
 
-  populatePofilePage() {
+  async init() {
+    try {
+      const { username, email, avatar } = await user();
+      this.username = username;
+      this.email = email;
+      this.avatar = avatar;
+
+      this.populateProfilePage();
+    } catch (error) {
+      console.error("Error initializing CustomerManager:", error);
+    }
+  }
+
+  populateProfilePage() {
     this.setPageTitle();
     this.createProfileCard();
     this.createOrderHistory();

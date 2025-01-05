@@ -9,4 +9,8 @@ export { default as ProfilePage } from "./profile.js";
 export { default as CookiePolicy } from "./cookiePolicy.js";
 export { default as LegalNotice } from "./legalNotice.js";
 export { default as TermsOfService } from "./termsOfService.js";
+export { default as Cart } from "./cart.js";
+export { default as CheckoutPage } from "./checkout.js";
+export { default as CheckoutSuccess } from "./checkoutSuccess.js";
+
 

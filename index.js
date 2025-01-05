@@ -28,6 +28,9 @@ import {
   TermsOfService,
   CookiePolicy,
   LegalNotice,
+  Cart,
+  CheckoutPage,
+  CheckoutSuccess,
 } from "./pages/index.js";
 
 const authManager = new AuthManager();
@@ -69,6 +72,9 @@ const routes = {
   "/legal/legalnotice.html": { render: LegalNotice, title: "Legal Notice" },
   "/legal/termsofservice.html": { render: TermsOfService, title: "Terms of Service" },
   "/legal/cookiepolicy.html": { render: CookiePolicy, title: "Cookie Policy" },
+  "/cart.html": { render: Cart, title: "Cart" },
+  "/checkout.html": { render: CheckoutPage, title: "Checkout" },
+  "/checkout-success.html": { render: CheckoutSuccess, title: "Checkout Success" },
 };
 
 const cssMapping = {
@@ -84,6 +90,9 @@ const cssMapping = {
   "/legal/legalnotice.html": "legalnotice.css",
   "/legal/termsofservice.html": "legalnotice.css",
   "/legal/cookiepolicy.html": "legalnotice.css",
+  "/cart.html": "cart.css",
+  "/checkout.html": "checkout.css",
+  "/checkoutSuccess.html": "checkout-success.css",
 };
 
 new Router(routes, "main-content", cssLoader, cssMapping);

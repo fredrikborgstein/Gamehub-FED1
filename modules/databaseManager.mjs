@@ -101,13 +101,6 @@ export default class databaseManager {
         const user = request.result;
 
         if (user && this.authManager.checkPassword(password, user.password)) {
-          const userSession = {
-            user: username,
-            email: user.email,
-            sessionId: sessionStorage.getItem("sessionId"),
-            expiresAt: Date.now() + 3600 * 1000,
-          };
-          sessionStorage.setItem("user", JSON.stringify(userSession));
           resolve(true);
         } else {
           resolve(false);
@@ -184,4 +177,47 @@ export default class databaseManager {
       throw error;
     }
   }
+
+  async getUser(username) {
+    try {
+      // Validate username
+      if (!username || typeof username !== "string") {
+        throw new Error("Invalid username: Must be a non-empty string.");
+      }
+
+      const db = await this.dbPromise;
+
+      // Log object store names to ensure "users" exists
+      console.log("Object stores available:", db.objectStoreNames);
+
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(["users"], "readonly");
+        const store = transaction.objectStore("users");
+
+        console.log("Fetching user with username:", username);
+
+        const request = store.get(username);
+
+        request.onsuccess = () => {
+          if (request.result) {
+            console.log("User fetched successfully:", request.result);
+            resolve(request.result);
+          } else {
+            console.warn(`User with username '${username}' not found.`);
+            reject(new Error(`User '${username}' not found in IndexedDB.`));
+          }
+        };
+
+        request.onerror = (event) => {
+          console.error("Error fetching user:", event.target.error);
+          reject(new Error("Failed to retrieve user from IndexedDB."));
+        };
+      });
+    } catch (error) {
+      console.error("Error in getUser method:", error);
+      throw error;
+    }
+  }
+
+
 }
