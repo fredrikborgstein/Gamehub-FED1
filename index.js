@@ -14,6 +14,8 @@ import {
   CartManager,
 } from "./modules/index.mjs";
 
+import { Home } from "./pages/index.js";
+
 const authManager = new AuthManager();
 const db = new databaseManager(authManager);
 const url = new URL(window.location.href);
