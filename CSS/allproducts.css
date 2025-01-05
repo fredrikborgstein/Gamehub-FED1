@@ -90,3 +90,12 @@ h2 {
     margin: 20px auto;
   }
 }
+
+#search-dropdown {
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+#search-dropdown div:hover {
+  background-color: #f0f0f0;
+}

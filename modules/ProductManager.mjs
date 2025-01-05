@@ -3,8 +3,10 @@ export default class ProductManager {
     this.baseApiUrl = "https://v2.api.noroff.dev/";
     this.genreFilter = document.getElementById("genre");
     this.sortBy = document.getElementById("sortby");
+    this.searchBox = document.getElementById("search");
     this.productGrid = document.getElementById("product-grid");
     this.products = [];
+    this.filteredProducts = [];
     this.cacheKey = "productsCache";
     this.cacheExpiration = 60 * 60 * 1000;
 
@@ -15,15 +17,37 @@ export default class ProductManager {
   registerEvents() {
     this.genreFilter.addEventListener("change", (e) => {
       e.preventDefault();
-      // Filtering logic can go here
-      console.log("Filter changed to:", e.target.value);
+      const selectedGenre = e.target.value;
+
+      if (selectedGenre === "All") {
+        this.filteredProducts = [...this.products];
+      } else {
+        this.filteredProducts = this.products.filter(
+            product => product.genre === selectedGenre
+        );
+      }
+
+      this.processProducts(this.filteredProducts);
     });
 
     this.sortBy.addEventListener("change", (e) => {
       e.preventDefault();
-      this.sortProducts(e.target.value);
+      this.sortProducts(e.target.value, this.filteredProducts);
+    });
+
+    const searchInput = document.getElementById("search");
+    searchInput.addEventListener("input", (e) => {
+      const query = e.target.value.toLowerCase();
+      this.showDropdownSuggestions(query, this.filteredProducts);
+    });
+
+    const clearFilterBtn = document.getElementById("clear-filter");
+    clearFilterBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      this.clearFilters();
     });
   }
+
 
   async getAllProducts() {
     try {
@@ -37,7 +61,8 @@ export default class ProductManager {
           const products = cachedObject.data;
           if (Array.isArray(products)) {
             this.products = products;
-            this.processProducts(products);
+            this.filteredProducts = [...this.products];
+            this.sortProducts("name", this.filteredProducts);
             this.populateGenreDropDown(products);
             return;
           }
@@ -53,15 +78,16 @@ export default class ProductManager {
         localStorage.setItem(this.cacheKey, JSON.stringify(data));
         localStorage.setItem(`${this.cacheKey}-timestamp`, Date.now().toString());
         this.products = products;
-        this.processProducts(products);
+        this.filteredProducts = [...this.products];
+        this.sortProducts("name", this.filteredProducts);
         this.populateGenreDropDown(products);
       } else {
         throw new Error("Invalid product data");
       }
     } catch (error) {
-      console.error("Error fetching products:", error);
     }
   }
+
 
   processProducts(products) {
     this.productGrid.innerHTML = "";
@@ -116,6 +142,9 @@ export default class ProductManager {
     const defaultOption = this.createOption("Genre", "Genre", true, true);
     this.genreFilter.appendChild(defaultOption);
 
+    const allOption = this.createOption("All", "All", false, true);
+    this.genreFilter.appendChild(allOption);
+
     const genres = [...new Set(products.map((product) => product.genre))];
     genres.forEach((genre) => {
       const option = this.createOption(genre, genre);
@@ -132,8 +161,8 @@ export default class ProductManager {
     return option;
   }
 
-  sortProducts(sortBy) {
-    const sortedProducts = [...this.products];
+  sortProducts(sortBy, products) {
+    const sortedProducts = [...products];
     switch (sortBy) {
       case "price":
         sortedProducts.sort((a, b) => a.price - b.price);
@@ -144,12 +173,19 @@ export default class ProductManager {
       case "release":
         sortedProducts.sort((a, b) => parseInt(b.released) - parseInt(a.released));
         break;
+      case "name":
       default:
-        sortedProducts.sort((a, b) => a.title.localeCompare(b.title));
+        sortedProducts.sort((a, b) => {
+          const nameA = a.title.trim().toLowerCase();
+          const nameB = b.title.trim().toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
         break;
     }
+
     this.processProducts(sortedProducts);
   }
+
 
   addButtonEventListeners() {
     const productBtns = document.getElementsByClassName("card-text");
@@ -161,9 +197,62 @@ export default class ProductManager {
         if (productId) {
           window.location.href = `/productpage.html?id=${productId}`;
         } else {
-          console.error("Failed to go to product");
         }
       });
     }
   }
+
+  showDropdownSuggestions(query, products) {
+    let dropdown = document.getElementById("search-dropdown");
+    if (!dropdown) {
+      dropdown = document.createElement("div");
+      dropdown.id = "search-dropdown";
+      dropdown.style.position = "absolute";
+      dropdown.style.backgroundColor = "#fff";
+      dropdown.style.border = "1px solid #ccc";
+      dropdown.style.width = "200px";
+      document.getElementById("search").parentElement.appendChild(dropdown);
+    }
+    dropdown.innerHTML = "";
+
+    if (!query.trim()) {
+      dropdown.style.display = "none";
+      return;
+    }
+
+    const matches = products.filter(product =>
+        product.title.toLowerCase().includes(query)
+    );
+
+    matches.forEach(product => {
+      const suggestion = document.createElement("div");
+      suggestion.textContent = product.title;
+      suggestion.style.padding = "8px";
+      suggestion.style.cursor = "pointer";
+
+      suggestion.addEventListener("click", () => {
+        window.location.href = `/productpage.html?id=${product.id}`;
+      });
+
+      dropdown.appendChild(suggestion);
+    });
+
+    dropdown.style.display = matches.length > 0 ? "block" : "none";
+  }
+
+  clearFilters() {
+    this.genreFilter.value = "All";
+    this.sortBy.value = "name";
+    this.searchBox.value = "";
+
+    this.filteredProducts = [...this.products];
+
+    const dropdown = document.getElementById("search-dropdown");
+    if (dropdown) dropdown.innerHTML = "";
+
+    this.processProducts(this.products);
+  }
+
+
+
 }
