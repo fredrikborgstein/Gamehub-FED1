@@ -57,11 +57,11 @@ export default class HomePage {
   processProducts(products) {
     const newReleases = products.newReleases;
     const bestSellers = products.bestSellers;
-    this.createHomePageProductCards(newReleases);
-    this.createHomePageProductCards(bestSellers);
+    this.createHomePageProductCards(newReleases, "releases");
+    this.createHomePageProductCards(bestSellers, "bestsellers");
   }
 
-  createHomePageProductCards = (products) => {
+  createHomePageProductCards = (products, element) => {
     products.forEach((product) => {
       const newReleaseCard = document.createElement("div");
       newReleaseCard.classList.add("card");
@@ -111,7 +111,12 @@ export default class HomePage {
       newReleaseCardButtonContainer.appendChild(newReleaseCardButton);
       newReleaseCard.appendChild(newReleaseCardButtonContainer);
 
-      this.newReleasesContainer.appendChild(newReleaseCard);
+      if (element === 'releases') {
+        this.newReleasesContainer.appendChild(newReleaseCard);
+      } else if (element === 'bestsellers') {
+        this.popularProductsContainer.appendChild(newReleaseCard);
+      }
+
     });
   };
 }
