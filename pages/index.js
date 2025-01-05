@@ -6,4 +6,7 @@ export { default as ContactPage } from "./contact.js";
 export { default as LoginPage } from "./login.js";
 export { default as RegisterPage } from "./register.js";
 export { default as ProfilePage } from "./profile.js";
+export { default as CookiePolicy } from "./cookiePolicy.js";
+export { default as LegalNotice } from "./legalNotice.js";
+export { default as TermsOfService } from "./termsOfService.js";
 

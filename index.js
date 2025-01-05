@@ -14,12 +14,10 @@ import {
   CartManager,
 } from "./modules/index.mjs";
 
-import { Home, About, AllProducts, ProductPage, ContactPage, LoginPage, RegisterPage, ProfilePage } from "./pages/index.js";
+import { Home, About, AllProducts, ProductPage, ContactPage, LoginPage, RegisterPage, ProfilePage, TermsOfService, CookiePolicy, LegalNotice } from "./pages/index.js";
 
 const authManager = new AuthManager();
 const db = new databaseManager(authManager);
-const url = new URL(window.location.href);
-const params = new URLSearchParams(url.search);
 const appContainer = document.getElementById("app");
 const mainContainer = document.createElement("main");
 mainContainer.id = "main-content";
@@ -33,39 +31,43 @@ appContainer.insertBefore(Header, mainContainer);
 appContainer.appendChild(Footer);
 
 const routes = {
-  "/": { render: Home, init: () => new HomePage() },
-  "/index.html": { render: Home, init: () => new HomePage() },
-  "/about.html": { render: About },
-  "/contact.html": { render: ContactPage },
-  "/allproducts.html": { render: AllProducts, init: () => new ProductManager() },
+  "/": { render: Home, init: () => new HomePage(), title: "Home" },
+  "/index.html": { render: Home, init: () => new HomePage(), title: "Home" },
+  "/about.html": { render: About, title: "About Us" },
+  "/contact.html": { render: ContactPage, title: "Contact Us" },
+  "/allproducts.html": { render: AllProducts, init: () => new ProductManager(), title: "All Products" },
   "/productpage.html": {
     render: ProductPage,
-    init: () => {
-      if (params.has("id")) {
-        const productId = params.get("id");
+    init: (queryParams) => {
+      if (queryParams.has("id")) {
+        const productId = queryParams.get("id");
         new ProductClass(productId);
       }
     },
+    title: "Product Details",
   },
-  "/register.html": { render: RegisterPage, init: () => new RegisterManager(db) },
-  "/login.html": { render: LoginPage, init: () => new LoginManager(db, authManager) },
-  "/profile.html": { render: ProfilePage, init: () => new CustomerManager(db) },
+  "/register.html": { render: RegisterPage, init: () => new RegisterManager(db), title: "Register" },
+  "/login.html": { render: LoginPage, init: () => new LoginManager(db, authManager), title: "Login" },
+  "/profile.html": { render: ProfilePage, init: () => new CustomerManager(db), title: "Profile" },
+  "/legal/legalnotice.html": { render: LegalNotice, title: "Legal Notice" },
+  '/legal/termsofservice.html': { render: TermsOfService, title: "Terms of Service" },
+  '/legal/cookiepolicy.html': { render: CookiePolicy, title: "CookiePolicy" },
 };
 
 document.addEventListener("DOMContentLoaded", () => {
   preloadCss(["index.css", "about.css", "allproducts.css"]);
-  routeHandler(window.location.pathname);
+  routeHandler(window.location.pathname + window.location.search);
 });
 
 function navigateTo(path) {
-  if (path !== window.location.pathname) {
+  if (path !== window.location.pathname + window.location.search) {
     window.history.pushState({}, "", path);
     routeHandler(path);
   }
 }
 
-function routeHandler(path) {
-  const basePath = path.split("?")[0];
+function routeHandler(fullPath) {
+  const [basePath, queryString] = fullPath.split("?");
   const route = routes[basePath] || routes["/"];
 
   if (route) {
@@ -76,12 +78,21 @@ function routeHandler(path) {
 
       mainContainer.innerHTML = pageContent;
       loadCss(getCssFile(basePath));
-      if (route.init) route.init();
+
+      if (route.init) {
+        const queryParams = new URLSearchParams(queryString);
+        route.init(queryParams);
+      }
+
+      if (route.title) {
+        document.title = route.title;
+      }
 
       mainContainer.style.opacity = 1;
     }, 100);
   } else {
     mainContainer.innerHTML = `<h1>404 - Page Not Found</h1>`;
+    document.title = "404 - Page Not Found";
   }
 }
 
@@ -91,18 +102,19 @@ function loadCss(file) {
   try {
     const existingLink = document.querySelector(`link[data-route-css]`);
     if (existingLink) {
-      existingLink.href = `css/${file}`;
+      existingLink.href = `/CSS/${file}`;
     } else {
       const newLink = document.createElement("link");
       newLink.rel = "stylesheet";
-      newLink.href = `css/${file}`;
+      newLink.href = `/CSS/${file}`;
       newLink.setAttribute("data-route-css", "true");
       document.head.appendChild(newLink);
     }
   } catch (error) {
-    console.error(`Failed to load CSS file: css/${file}`, error);
+    console.error(`Failed to load CSS file: /CSS/${file}`, error);
   }
 }
+
 
 function getCssFile(path) {
   const cssMapping = {
@@ -115,6 +127,9 @@ function getCssFile(path) {
     "/register.html": "register.css",
     "/login.html": "register.css",
     "/profile.html": "profile.css",
+    "/legal/legalnotice.html": "legalnotice.css",
+    "/legal/termsofservice.html": "legalnotice.css",
+    "/legal/cookiepolicy.html": "legalnotice.css",
   };
   return cssMapping[path];
 }
@@ -139,5 +154,5 @@ document.addEventListener("click", (event) => {
 });
 
 window.addEventListener("popstate", () => {
-  routeHandler(window.location.pathname);
+  routeHandler(window.location.pathname + window.location.search);
 });
