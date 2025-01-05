@@ -17,6 +17,7 @@ export default class ProductManager {
   registerEvents() {
     this.genreFilter.addEventListener("change", (e) => {
       e.preventDefault();
+      console.log('hello');
       const selectedGenre = e.target.value;
 
       if (selectedGenre === "All") {

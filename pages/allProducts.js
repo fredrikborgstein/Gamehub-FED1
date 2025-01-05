@@ -1,29 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Browse all our products, and discover the best prices on your favorite games. Discount for members!"
-    />
-    <link rel="stylesheet" href="./CSS/allproducts.css" />
-    <link rel="stylesheet" href="./CSS/site-wide.css" />
-    <link rel="stylesheet" href="./CSS/card.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
-      rel="stylesheet"
-    />
-    <script
-      src="https://kit.fontawesome.com/7a5a56048c.js"
-      crossorigin="anonymous"
-    ></script>
-    <title>GameHub - All Products</title>
-  </head>
-  <body>
-    <main>
+export default function AllProducts() {
+    return (
+        `
+        <div>
       <!-- TITLE SECTION -->
       <section id="title-section">
         <h1>All Products</h1>
@@ -59,7 +37,7 @@
       </section>
       <section id="product-grid">
       </section>
-    </main>
-    <script type="module" src="index.js" defer></script>
-  </body>
-</html>
+    </div>
+        `
+    )
+}
