@@ -24,26 +24,35 @@ export default class HomePage {
     if (cachedData && cachedTimestamp) {
       const now = Date.now();
       if (now - parseInt(cachedTimestamp, 10) < cacheExpiration) {
-        const products = JSON.parse(cachedData);
-        console.log("Using cached data:", products);
-        this.processProducts(products);
+        const cachedObject = JSON.parse(cachedData);
+        const products = cachedObject.data;
+        if (!Array.isArray(products)) {
+          return;
+        }
+        const bestSellers = products.slice(0, 3);
+        const newReleases = products.slice(3, 6);
+
+        this.processProducts({ bestSellers, newReleases });
         return;
       }
     }
 
     const response = await fetch(`${this.baseApiUrl}gamehub`);
-    const products = await response.json();
-    console.log(products);
-    const bestSellers = products.data.slice(0, 3);
-    const newReleases = products.data.slice(3, 6);
+    const data = await response.json();
 
-    localStorage.setItem(cacheKey, JSON.stringify(products));
+    const products = data.data;
+    if (!Array.isArray(products)) {
+      return;
+    }
+
+    const bestSellers = products.slice(0, 3);
+    const newReleases = products.slice(3, 6);
+
+    localStorage.setItem(cacheKey, JSON.stringify(data));
     localStorage.setItem(`${cacheKey}-timestamp`, Date.now().toString());
-
-    console.log("Fetched new data:", products);
-
-    this.processProducts(products);
+    this.processProducts({ bestSellers, newReleases });
   }
+
 
   processProducts(products) {
     const bestSellers = products.data.slice(0, 3);
@@ -55,20 +64,17 @@ export default class HomePage {
 
   createHomePageProductCards = (products) => {
     products.forEach((product) => {
-      // Create the card
       const newReleaseCard = document.createElement("div");
       newReleaseCard.classList.add("card");
       newReleaseCard.id = product.id;
       const tags = product.tags;
 
-      // The card title
       const newReleaseCardTitleContainer = document.createElement("div");
       const newReleaseCardTitle = document.createElement("h3");
       newReleaseCardTitle.innerText = product.title;
       newReleaseCardTitleContainer.appendChild(newReleaseCardTitle);
       newReleaseCard.appendChild(newReleaseCardTitleContainer);
 
-      // The card image
       const newReleaseImageContainer = document.createElement("div");
       newReleaseImageContainer.classList.add("card-image");
       const newReleaseCardImage = document.createElement("img");
@@ -77,11 +83,9 @@ export default class HomePage {
       newReleaseImageContainer.appendChild(newReleaseCardImage);
       newReleaseCard.appendChild(newReleaseImageContainer);
 
-      // The card description
       const newReleaseCardDescriptionContainer = document.createElement("div");
       newReleaseCardDescriptionContainer.classList.add("card-info");
 
-      // The card tags
       const newReleaseCardTags = document.createElement("p");
       tags.forEach((tag) => {
         const newReleaseCardTag = document.createElement("span");
@@ -92,7 +96,6 @@ export default class HomePage {
       });
       newReleaseCardDescriptionContainer.appendChild(newReleaseCardTags);
 
-      // The card price
       const newReleaseCardDescriptionPrice = document.createElement("p");
       newReleaseCardDescriptionPrice.innerText = product.price;
       newReleaseCardDescriptionContainer.appendChild(
@@ -100,7 +103,6 @@ export default class HomePage {
       );
       newReleaseCard.appendChild(newReleaseCardDescriptionContainer);
 
-      // The card button
       const newReleaseCardButtonContainer = document.createElement("div");
       newReleaseCardButtonContainer.classList.add("card-button");
       const newReleaseCardButton = document.createElement("a");
