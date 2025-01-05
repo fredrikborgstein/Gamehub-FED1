@@ -1,3 +1,5 @@
+import {SessionManager} from "./index.mjs";
+
 export default class LoginPage {
   constructor(databaseManager, authManager) {
     this.db = databaseManager;
@@ -15,6 +17,7 @@ export default class LoginPage {
 
   async loginUser() {
     const data = new FormData(this.registerForm);
+    const sessionManager = new SessionManager();
 
     try {
       if (await this.db.loginUser(data)) {
@@ -25,7 +28,7 @@ export default class LoginPage {
           sessionId: sessionStorage.getItem("sessionId"),
           expiresAt: Date.now() + 3600 * 1000,
         };
-        sessionStorage.setItem("auth", JSON.stringify(auth));
+        sessionManager.setSession(auth);
         window.location.href = "./profile.html";
       } else {
         console.error("Error logging in user");
@@ -34,4 +37,5 @@ export default class LoginPage {
       console.error("Error logging in user: ", error);
     }
   }
+
 }

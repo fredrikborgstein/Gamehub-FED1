@@ -1,3 +1,5 @@
+import {SessionManager} from "./index.mjs";
+
 export default class RegisterPage {
   constructor(databaseManager) {
     this.db = databaseManager;
@@ -14,14 +16,23 @@ export default class RegisterPage {
 
   async registerUser() {
     const data = new FormData(this.registerForm);
-    if (!this.validateRegistrationData(data)) {
+    const sessionManager = new SessionManager();
+
+    if (!await this.validateRegistrationData(data)) {
       console.error("Invalid registration data");
       return;
     }
 
     try {
       if (await this.db.registerUser(data)) {
-        console.log("User registered successfully");
+        const auth = {
+          isAuth: true,
+          username: data.get("username"),
+          sessionId: sessionStorage.getItem("sessionId"),
+          expiresAt: Date.now() + 3600 * 1000,
+        };
+        sessionManager.setSession(auth);
+        window.location.href = "./profile.html";
       } else {
         console.error("Error registering user");
       }
@@ -29,6 +40,7 @@ export default class RegisterPage {
       console.error("Error registering user: ", error);
     }
   }
+
 
   async validateRegistrationData(data) {
     const username = data.get("username");
