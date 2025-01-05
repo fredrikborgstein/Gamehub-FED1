@@ -69,6 +69,7 @@ export default class ProductManager {
       const card = this.createProductCard(product);
       this.productGrid.appendChild(card);
     });
+    this.addButtonEventListeners();
   }
 
   createProductCard(product) {
@@ -148,5 +149,21 @@ export default class ProductManager {
         break;
     }
     this.processProducts(sortedProducts);
+  }
+
+  addButtonEventListeners() {
+    const productBtns = document.getElementsByClassName("card-text");
+    for (const btn of productBtns) {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const productId = e.target.dataset.id;
+
+        if (productId) {
+          window.location.href = `/productpage.html?id=${productId}`;
+        } else {
+          console.error("Failed to go to product");
+        }
+      });
+    }
   }
 }
