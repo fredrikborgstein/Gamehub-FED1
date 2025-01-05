@@ -9,10 +9,13 @@ import Toaster from "./modules/toast.mjs";
 import Modal from "./modules/modal.mjs";
 import CustomerManager from "./modules/customerManager.mjs";
 import ProductManager from "./modules/productManager.mjs";
+import ProductPage from "./modules/productPage.mjs";
 
 const authManager = new AuthManager();
 const db = new databaseManager(authManager);
-const route = window.location.pathname;
+const url = new URL(window.location.href);
+const route = url.pathname;
+const params = new URLSearchParams(url.search);
 const pathDepth = window.location.pathname.split("/").length - 2;
 const pathPrefix = "../".repeat(pathDepth);
 const sessionId = authManager.generateSessionId();
@@ -34,5 +37,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const customerManager = new CustomerManager(db);
   } else if(route === "/allproducts.html") {
     const productManager = new ProductManager();
+  } else if (route === "/productpage.html" && params.has("id")) {
+    const productId = params.get("id");
+    const productPage = new ProductPage(productId);
+  } else {
+    console.error("Unknown route:", route);
   }
 });
