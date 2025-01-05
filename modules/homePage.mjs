@@ -55,9 +55,8 @@ export default class HomePage {
 
 
   processProducts(products) {
-    const bestSellers = products.data.slice(0, 3);
-    const newReleases = products.data.slice(3, 6);
-
+    const newReleases = products.newReleases;
+    const bestSellers = products.bestSellers;
     this.createHomePageProductCards(newReleases);
     this.createHomePageProductCards(bestSellers);
   }
