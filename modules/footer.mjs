@@ -1,5 +1,8 @@
+import Toaster from "./toast.mjs";
+
 export default function footer(pathDepth, pathPrefix) {
   const footer = document.createElement("footer");
+
   footer.innerHTML = `
     <div id="footer-socials">
         <a href="https://www.youtube.com/" target="_blank"
@@ -51,11 +54,41 @@ export default function footer(pathDepth, pathPrefix) {
           <label for="email-input" id="email-label" class="sr-only"
             >Input for email, to signup for newsletter</label
           >
-          <a id="newsletter-button" class="btn newsletter-btn" href="./sub.html"
+          <a id="newsletter-button" class="btn newsletter-btn" href="#"
             >Subscribe</a
           >
         </form>
       </div>
   `;
+
+  setTimeout(() => {
+    const subBtn = footer.querySelector("#newsletter-button");
+    const subInput = footer.querySelector("#email-input");
+
+    if (subBtn) {
+      const toast = new Toaster();
+
+      subBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        const email = subInput.value.trim();
+
+        if (email === "") {
+          toast.show("You need to enter a valid email!", "error", 4000);
+          return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          toast.show("You need to enter a valid email!", "error", 4000);
+          return;
+        }
+
+        toast.show("You subscribed to our newsletter!", "success", 4000);
+      });
+    }
+  });
+
+
   return footer;
 }

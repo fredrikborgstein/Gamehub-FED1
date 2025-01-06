@@ -8,10 +8,22 @@ export default class HomePage {
       "bestsellers-cards-container"
     );
     this.getAllProducts();
+    this.registerEvents();
   }
 
   registerEvents() {
-    // Add event listeners here
+      const productBtns = document.getElementsByClassName("card-text");
+      for (const btn of productBtns) {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          const productId = e.target.dataset.id;
+
+          if (productId) {
+            window.location.href = `/productpage.html?id=${productId}`;
+          } else {
+          }
+        });
+      }
   }
 
   async getAllProducts() {
@@ -107,7 +119,8 @@ export default class HomePage {
       const newReleaseCardButton = document.createElement("a");
       newReleaseCardButton.classList.add("card-text");
       newReleaseCardButton.innerText = "View Product";
-      newReleaseCardButton.href = `product.html?id=${product.id}`;
+      newReleaseCardButton.href = `#`;
+      newReleaseCardButton.setAttribute("data-id", product.id);
       newReleaseCardButtonContainer.appendChild(newReleaseCardButton);
       newReleaseCard.appendChild(newReleaseCardButtonContainer);
 
